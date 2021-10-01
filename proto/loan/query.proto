@@ -1,0 +1,44 @@
+syntax = "proto3";
+package cosmonaut.loan.loan;
+
+import "google/api/annotations.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "loan/loan.proto";
+// this line is used by starport scaffolding # 1
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/cosmonaut/loan/x/loan/types";
+
+// Query defines the gRPC querier service.
+service Query {
+    // Queries a loan by id.
+	rpc Loan(QueryGetLoanRequest) returns (QueryGetLoanResponse) {
+		option (google.api.http).get = "/cosmonaut/loan/loan/loan/{id}";
+	}
+
+	// Queries a list of loan items.
+	rpc LoanAll(QueryAllLoanRequest) returns (QueryAllLoanResponse) {
+		option (google.api.http).get = "/cosmonaut/loan/loan/loan";
+	}
+
+// this line is used by starport scaffolding # 2
+}
+
+message QueryGetLoanRequest {
+	uint64 id = 1;
+}
+
+message QueryGetLoanResponse {
+	Loan Loan = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryAllLoanRequest {
+	cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message QueryAllLoanResponse {
+	repeated Loan Loan = 1 [(gogoproto.nullable) = false];
+	cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// this line is used by starport scaffolding # 3

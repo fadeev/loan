@@ -1,0 +1,15 @@
+syntax = "proto3";
+package cosmonaut.loan.loan;
+
+import "loan/loan.proto";
+// this line is used by starport scaffolding # genesis/proto/import
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/cosmonaut/loan/x/loan/types";
+
+// GenesisState defines the loan module's genesis state.
+message GenesisState {
+    repeated Loan loanList = 1 [(gogoproto.nullable) = false];
+  uint64 loanCount = 2;
+  // this line is used by starport scaffolding # genesis/proto/state
+}
