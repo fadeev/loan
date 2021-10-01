@@ -20,7 +20,7 @@ func (k msgServer) LiquidateLoan(goCtx context.Context, msg *types.MsgLiquidateL
 	}
 
 	moduleAcc := sdk.AccAddress(crypto.AddressHash([]byte(types.ModuleName)))
-	lender := sdk.AccAddress(loan.Lender)
+	lender, _ := sdk.AccAddressFromBech32(loan.Lender)
 	amount, _ := sdk.ParseCoinsNormalized(loan.Amount)
 
 	deadline, err := strconv.ParseInt(loan.Deadline, 10, 64)

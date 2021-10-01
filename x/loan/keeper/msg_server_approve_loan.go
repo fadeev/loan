@@ -17,8 +17,8 @@ func (k msgServer) ApproveLoan(goCtx context.Context, msg *types.MsgApproveLoan)
 		return nil, sdkerrors.Wrap(sdkerrors.ErrKeyNotFound, fmt.Sprintf("key %d doesn't exist", msg.Id))
 	}
 
-	lender := sdk.AccAddress(msg.Creator)
-	borrower := sdk.AccAddress(loan.Borrower)
+	lender, _ := sdk.AccAddressFromBech32(msg.Creator)
+	borrower, _ := sdk.AccAddressFromBech32(loan.Borrower)
 	amount, _ := sdk.ParseCoinsNormalized(loan.Amount)
 
 	k.bankKeeper.SendCoins(ctx, lender, borrower, amount)
