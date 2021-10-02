@@ -8,7 +8,6 @@ import (
 	"github.com/cosmonaut/loan/x/loan/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/tendermint/tendermint/crypto"
 )
 
 func (k msgServer) LiquidateLoan(goCtx context.Context, msg *types.MsgLiquidateLoan) (*types.MsgLiquidateLoanResponse, error) {
@@ -19,7 +18,10 @@ func (k msgServer) LiquidateLoan(goCtx context.Context, msg *types.MsgLiquidateL
 		return nil, sdkerrors.Wrap(sdkerrors.ErrKeyNotFound, fmt.Sprintf("key %d doesn't exist", msg.Id))
 	}
 
-	moduleAcc := sdk.AccAddress(crypto.AddressHash([]byte(types.ModuleName)))
+	if loan.State != "approved" {
+		return nil, sdkerrors.Wrapf(types.ErrWrongLoanState, "%v", loan.State)
+	}
+
 	lender, _ := sdk.AccAddressFromBech32(loan.Lender)
 	amount, _ := sdk.ParseCoinsNormalized(loan.Amount)
 
@@ -29,7 +31,7 @@ func (k msgServer) LiquidateLoan(goCtx context.Context, msg *types.MsgLiquidateL
 	}
 
 	if ctx.BlockHeight() > deadline {
-		k.bankKeeper.SendCoins(ctx, moduleAcc, lender, amount)
+		k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lender, amount)
 	}
 
 	return &types.MsgLiquidateLoanResponse{}, nil

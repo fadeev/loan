@@ -17,6 +17,10 @@ func (k msgServer) RepayLoan(goCtx context.Context, msg *types.MsgRepayLoan) (*t
 		return nil, sdkerrors.Wrap(sdkerrors.ErrKeyNotFound, fmt.Sprintf("key %d doesn't exist", msg.Id))
 	}
 
+	if loan.State != "approved" {
+		return nil, sdkerrors.Wrapf(types.ErrWrongLoanState, "%v", loan.State)
+	}
+
 	lender, _ := sdk.AccAddressFromBech32(loan.Lender)
 	borrower, _ := sdk.AccAddressFromBech32(loan.Borrower)
 	amount, _ := sdk.ParseCoinsNormalized(loan.Amount)
