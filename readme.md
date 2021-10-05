@@ -1,6 +1,16 @@
 # loan
 **loan** is a blockchain built using Cosmos SDK and Tendermint and created with [Starport](https://github.com/tendermint/starport).
 
+As a borrower you post a request for a loan and specify the loan amount, the fee you're going to pay to the lender, the collateral you're willing to post and the deadline (the date after which the lender can liquidate the loan and get the collateral). Requesting a loan transfers the collateral amount from the borrower to the module account.
+
+As a lender you can approve the loan. Approving the loan transfers the loan amount from the lender to the borrower.
+
+As a borrower you can repay the loan. Repaying the loan transfers amount and fee to the lender and collateral back to the borrower from the module account.
+
+As a lender you can liquidate the loan if the height is past the height of the deadline. Liquidating the loan transfers the collateral from the module account to the lender.
+
+All state transitions change the state property of the loan.
+
 ## Project scaffolding
 
 ```
