@@ -12713,6 +12713,8 @@ definitions:
         type: string
   cosmonaut.loan.loan.MsgApproveLoanResponse:
     type: object
+  cosmonaut.loan.loan.MsgCancelLoanResponse:
+    type: object
   cosmonaut.loan.loan.MsgLiquidateLoanResponse:
     type: object
   cosmonaut.loan.loan.MsgRepayLoanResponse:
