@@ -34,9 +34,11 @@ func (k msgServer) LiquidateLoan(goCtx context.Context, msg *types.MsgLiquidateL
 		panic(err)
 	}
 
-	if ctx.BlockHeight() > deadline {
-		k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lender, amount)
+	if ctx.BlockHeight() < deadline {
+		return nil, sdkerrors.Wrap(types.ErrDeadline, "Cannot liquidate before deadline")
 	}
+
+	k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lender, amount)
 
 	return &types.MsgLiquidateLoanResponse{}, nil
 }
