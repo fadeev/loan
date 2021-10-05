@@ -40,5 +40,9 @@ func (k msgServer) LiquidateLoan(goCtx context.Context, msg *types.MsgLiquidateL
 
 	k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lender, amount)
 
+	loan.State = "liquidated"
+
+	k.SetLoan(ctx, loan)
+
 	return &types.MsgLiquidateLoanResponse{}, nil
 }
