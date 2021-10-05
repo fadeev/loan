@@ -1,6 +1,26 @@
 # loan
 **loan** is a blockchain built using Cosmos SDK and Tendermint and created with [Starport](https://github.com/tendermint/starport).
 
+## Project scaffolding
+
+```
+starport s chain github.com/cosmonaut/loan --no-module
+
+cd loan
+
+starport s module loan --dep bank
+
+starport s list loan amount fee collateral deadline state borrower lender --no-message
+
+starport s message request-loan amount fee collateral deadline
+
+starport s message approve-loan id:uint
+
+starport s message repay-loan id:uint
+
+starport s message liquidate-loan id:uint
+```
+
 ## Get started
 
 ```
