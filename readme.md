@@ -13,6 +13,8 @@ All state transitions change the state property of the loan.
 
 ## Project scaffolding
 
+Using Starport v0.18.
+
 ```
 starport s chain github.com/cosmonaut/loan --no-module
 
