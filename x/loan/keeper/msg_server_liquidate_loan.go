@@ -18,6 +18,10 @@ func (k msgServer) LiquidateLoan(goCtx context.Context, msg *types.MsgLiquidateL
 		return nil, sdkerrors.Wrap(sdkerrors.ErrKeyNotFound, fmt.Sprintf("key %d doesn't exist", msg.Id))
 	}
 
+	if loan.Lender != msg.Creator {
+		return nil, sdkerrors.Wrap(sdkerrors.ErrUnauthorized, "Cannot liquidate: not the lender")
+	}
+
 	if loan.State != "approved" {
 		return nil, sdkerrors.Wrapf(types.ErrWrongLoanState, "%v", loan.State)
 	}
@@ -30,9 +34,15 @@ func (k msgServer) LiquidateLoan(goCtx context.Context, msg *types.MsgLiquidateL
 		panic(err)
 	}
 
-	if ctx.BlockHeight() > deadline {
-		k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lender, amount)
+	if ctx.BlockHeight() < deadline {
+		return nil, sdkerrors.Wrap(types.ErrDeadline, "Cannot liquidate before deadline")
 	}
+
+	k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lender, amount)
+
+	loan.State = "liquidated"
+
+	k.SetLoan(ctx, loan)
 
 	return &types.MsgLiquidateLoanResponse{}, nil
 }
