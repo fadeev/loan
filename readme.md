@@ -31,6 +31,8 @@ starport s message approve-loan id:uint
 starport s message repay-loan id:uint
 
 starport s message liquidate-loan id:uint
+
+starport s message cancel-loan id:uint
 ```
 
 ## Get started
