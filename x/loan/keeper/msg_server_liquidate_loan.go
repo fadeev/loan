@@ -27,7 +27,7 @@ func (k msgServer) LiquidateLoan(goCtx context.Context, msg *types.MsgLiquidateL
 	}
 
 	lender, _ := sdk.AccAddressFromBech32(loan.Lender)
-	amount, _ := sdk.ParseCoinsNormalized(loan.Amount)
+	collateral, _ := sdk.ParseCoinsNormalized(loan.Collateral)
 
 	deadline, err := strconv.ParseInt(loan.Deadline, 10, 64)
 	if err != nil {
@@ -38,7 +38,7 @@ func (k msgServer) LiquidateLoan(goCtx context.Context, msg *types.MsgLiquidateL
 		return nil, sdkerrors.Wrap(types.ErrDeadline, "Cannot liquidate before deadline")
 	}
 
-	k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lender, amount)
+	k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lender, collateral)
 
 	loan.State = "liquidated"
 
