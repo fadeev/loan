@@ -10,5 +10,4 @@ import (
 var (
 	ErrWrongLoanState = sdkerrors.Register(ModuleName, 1, "wrong loan state")
 	ErrDeadline       = sdkerrors.Register(ModuleName, 2, "deadline")
-	ErrSendCoinsFail  = sdkerrors.Register(ModuleName, 3, "fail to send coins")
 )
