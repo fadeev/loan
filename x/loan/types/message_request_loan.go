@@ -7,7 +7,7 @@ import (
 
 var _ sdk.Msg = &MsgRequestLoan{}
 
-func NewMsgRequestLoan(creator string, amount string, fee string, collateral string, deadline string) *MsgRequestLoan {
+func NewMsgRequestLoan(creator string, amount sdk.Coins, fee sdk.Coins, collateral sdk.Coins, deadline uint64) *MsgRequestLoan {
 	return &MsgRequestLoan{
 		Creator:    creator,
 		Amount:     amount,
@@ -42,6 +42,24 @@ func (msg *MsgRequestLoan) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
 		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
+	}
+	if !sdk.Coins(msg.Amount).IsValid() {
+		return sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "amount is not a valid Coins object")
+	}
+	if sdk.Coins(msg.Amount).Empty() {
+		return sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "amount is empty")
+	}
+	if !sdk.Coins(msg.Fee).IsValid() {
+		return sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "fee is not a valid Coins object")
+	}
+	if sdk.Coins(msg.Fee).Empty() {
+		return sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "fee is empty")
+	}
+	if !sdk.Coins(msg.Collateral).IsValid() {
+		return sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "collateral is not a valid Coins object")
+	}
+	if sdk.Coins(msg.Collateral).Empty() {
+		return sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "collateral is empty")
 	}
 	return nil
 }

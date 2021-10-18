@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	keepertest "github.com/cosmonaut/loan/testutil/keeper"
+	"github.com/cosmonaut/loan/testutil/nullify"
 	"github.com/cosmonaut/loan/x/loan/keeper"
 	"github.com/cosmonaut/loan/x/loan/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -24,7 +25,10 @@ func TestLoanGet(t *testing.T) {
 	for _, item := range items {
 		got, found := keeper.GetLoan(ctx, item.Id)
 		require.True(t, found)
-		require.Equal(t, item, got)
+		require.Equal(t,
+			nullify.Fill(&item),
+			nullify.Fill(&got),
+		)
 	}
 }
 
@@ -41,7 +45,10 @@ func TestLoanRemove(t *testing.T) {
 func TestLoanGetAll(t *testing.T) {
 	keeper, ctx := keepertest.LoanKeeper(t)
 	items := createNLoan(keeper, ctx, 10)
-	require.ElementsMatch(t, items, keeper.GetAllLoan(ctx))
+	require.ElementsMatch(t,
+		nullify.Fill(items),
+		nullify.Fill(keeper.GetAllLoan(ctx)),
+	)
 }
 
 func TestLoanCount(t *testing.T) {

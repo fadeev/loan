@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/cosmonaut/loan/x/loan/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -14,7 +13,7 @@ func (k msgServer) ApproveLoan(goCtx context.Context, msg *types.MsgApproveLoan)
 
 	loan, found := k.GetLoan(ctx, msg.Id)
 	if !found {
-		return nil, sdkerrors.Wrapf(sdkerrors.ErrKeyNotFound, fmt.Sprintf("key %d doesn't exist", msg.Id))
+		return nil, sdkerrors.Wrapf(sdkerrors.ErrKeyNotFound, "key %d doesn't exist", msg.Id)
 	}
 
 	// TODO: for some reason the error doesn't get printed to the terminal
@@ -24,13 +23,14 @@ func (k msgServer) ApproveLoan(goCtx context.Context, msg *types.MsgApproveLoan)
 
 	lender, _ := sdk.AccAddressFromBech32(msg.Creator)
 	borrower, _ := sdk.AccAddressFromBech32(loan.Borrower)
-	amount, _ := sdk.ParseCoinsNormalized(loan.Amount)
 
-	k.bankKeeper.SendCoins(ctx, lender, borrower, amount)
+	err := k.bankKeeper.SendCoins(ctx, lender, borrower, loan.Amount)
+	if err != nil {
+		return nil, err
+	}
 
 	loan.Lender = msg.Creator
 	loan.State = "approved"
-
 	k.SetLoan(ctx, loan)
 
 	return &types.MsgApproveLoanResponse{}, nil

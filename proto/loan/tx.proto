@@ -2,25 +2,27 @@ syntax = "proto3";
 package cosmonaut.loan.loan;
 
 // this line is used by starport scaffolding # proto/tx/import
+import "cosmos/base/v1beta1/coin.proto";
+import "gogoproto/gogo.proto";
 
 option go_package = "github.com/cosmonaut/loan/x/loan/types";
 
 // Msg defines the Msg service.
 service Msg {
-      rpc RequestLoan(MsgRequestLoan) returns (MsgRequestLoanResponse);
+  rpc RequestLoan(MsgRequestLoan) returns (MsgRequestLoanResponse);
   rpc ApproveLoan(MsgApproveLoan) returns (MsgApproveLoanResponse);
   rpc RepayLoan(MsgRepayLoan) returns (MsgRepayLoanResponse);
   rpc LiquidateLoan(MsgLiquidateLoan) returns (MsgLiquidateLoanResponse);
   rpc CancelLoan(MsgCancelLoan) returns (MsgCancelLoanResponse);
-// this line is used by starport scaffolding # proto/tx/rpc
+  // this line is used by starport scaffolding # proto/tx/rpc
 }
 
 message MsgRequestLoan {
   string creator = 1;
-  string amount = 2;
-  string fee = 3;
-  string collateral = 4;
-  string deadline = 5;
+  repeated cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
+  repeated cosmos.base.v1beta1.Coin fee = 3 [(gogoproto.nullable) = false];
+  repeated cosmos.base.v1beta1.Coin collateral = 4 [(gogoproto.nullable) = false];
+  uint64 deadline = 5;
 }
 
 message MsgRequestLoanResponse {

@@ -11,6 +11,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	keepertest "github.com/cosmonaut/loan/testutil/keeper"
+	"github.com/cosmonaut/loan/testutil/nullify"
 	"github.com/cosmonaut/loan/x/loan/types"
 )
 
@@ -50,7 +51,10 @@ func TestLoanQuerySingle(t *testing.T) {
 				require.ErrorIs(t, err, tc.err)
 			} else {
 				require.NoError(t, err)
-				require.Equal(t, tc.response, response)
+				require.Equal(t,
+					nullify.Fill(tc.response),
+					nullify.Fill(response),
+				)
 			}
 		})
 	}
@@ -77,7 +81,10 @@ func TestLoanQueryPaginated(t *testing.T) {
 			resp, err := keeper.LoanAll(wctx, request(nil, uint64(i), uint64(step), false))
 			require.NoError(t, err)
 			require.LessOrEqual(t, len(resp.Loan), step)
-			require.Subset(t, msgs, resp.Loan)
+			require.Subset(t,
+				nullify.Fill(msgs),
+				nullify.Fill(resp.Loan),
+			)
 		}
 	})
 	t.Run("ByKey", func(t *testing.T) {
@@ -87,7 +94,10 @@ func TestLoanQueryPaginated(t *testing.T) {
 			resp, err := keeper.LoanAll(wctx, request(next, 0, uint64(step), false))
 			require.NoError(t, err)
 			require.LessOrEqual(t, len(resp.Loan), step)
-			require.Subset(t, msgs, resp.Loan)
+			require.Subset(t,
+				nullify.Fill(msgs),
+				nullify.Fill(resp.Loan),
+			)
 			next = resp.Pagination.NextKey
 		}
 	})
@@ -95,6 +105,10 @@ func TestLoanQueryPaginated(t *testing.T) {
 		resp, err := keeper.LoanAll(wctx, request(nil, 0, 0, true))
 		require.NoError(t, err)
 		require.Equal(t, len(msgs), int(resp.Pagination.Total))
+		require.ElementsMatch(t,
+			nullify.Fill(msgs),
+			nullify.Fill(resp.Loan),
+		)
 	})
 	t.Run("InvalidRequest", func(t *testing.T) {
 		_, err := keeper.LoanAll(wctx, nil)

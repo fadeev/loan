@@ -28,10 +28,10 @@ func NewKeeper(
 	bankKeeper types.BankKeeper,
 ) *Keeper {
 	return &Keeper{
-		cdc:      cdc,
-		storeKey: storeKey,
-		memKey:   memKey,
 
+		cdc:        cdc,
+		storeKey:   storeKey,
+		memKey:     memKey,
 		bankKeeper: bankKeeper,
 	}
 }

@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/cosmonaut/loan/x/loan/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -14,7 +13,7 @@ func (k msgServer) RepayLoan(goCtx context.Context, msg *types.MsgRepayLoan) (*t
 
 	loan, found := k.GetLoan(ctx, msg.Id)
 	if !found {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrKeyNotFound, fmt.Sprintf("key %d doesn't exist", msg.Id))
+		return nil, sdkerrors.Wrapf(sdkerrors.ErrKeyNotFound, "key %d doesn't exist", msg.Id)
 	}
 
 	if loan.State != "approved" {
@@ -23,16 +22,23 @@ func (k msgServer) RepayLoan(goCtx context.Context, msg *types.MsgRepayLoan) (*t
 
 	lender, _ := sdk.AccAddressFromBech32(loan.Lender)
 	borrower, _ := sdk.AccAddressFromBech32(loan.Borrower)
-	amount, _ := sdk.ParseCoinsNormalized(loan.Amount)
-	fee, _ := sdk.ParseCoinsNormalized(loan.Fee)
-	collateral, _ := sdk.ParseCoinsNormalized(loan.Collateral)
 
-	k.bankKeeper.SendCoins(ctx, borrower, lender, amount)
-	k.bankKeeper.SendCoins(ctx, borrower, lender, fee)
-	k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, borrower, collateral)
+	err := k.bankKeeper.SendCoins(ctx, borrower, lender, loan.Amount)
+	if err != nil {
+		return nil, err
+	}
+
+	err = k.bankKeeper.SendCoins(ctx, borrower, lender, loan.Fee)
+	if err != nil {
+		return nil, err
+	}
+
+	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, borrower, loan.Collateral)
+	if err != nil {
+		return nil, err
+	}
 
 	loan.State = "repayed"
-
 	k.SetLoan(ctx, loan)
 
 	return &types.MsgRepayLoanResponse{}, nil
