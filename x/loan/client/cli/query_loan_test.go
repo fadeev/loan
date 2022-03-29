@@ -12,6 +12,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/cosmonaut/loan/testutil/network"
+	"github.com/cosmonaut/loan/testutil/nullify"
 	"github.com/cosmonaut/loan/x/loan/client/cli"
 	"github.com/cosmonaut/loan/x/loan/types"
 )
@@ -23,9 +24,11 @@ func networkWithLoanObjects(t *testing.T, n int) (*network.Network, []types.Loan
 	require.NoError(t, cfg.Codec.UnmarshalJSON(cfg.GenesisState[types.ModuleName], &state))
 
 	for i := 0; i < n; i++ {
-		state.LoanList = append(state.LoanList, types.Loan{
+		loan := types.Loan{
 			Id: uint64(i),
-		})
+		}
+		nullify.Fill(&loan)
+		state.LoanList = append(state.LoanList, loan)
 	}
 	buf, err := cfg.Codec.MarshalJSON(&state)
 	require.NoError(t, err)
@@ -74,7 +77,10 @@ func TestShowLoan(t *testing.T) {
 				var resp types.QueryGetLoanResponse
 				require.NoError(t, net.Config.Codec.UnmarshalJSON(out.Bytes(), &resp))
 				require.NotNil(t, resp.Loan)
-				require.Equal(t, tc.obj, resp.Loan)
+				require.Equal(t,
+					nullify.Fill(&tc.obj),
+					nullify.Fill(&resp.Loan),
+				)
 			}
 		})
 	}
@@ -108,7 +114,10 @@ func TestListLoan(t *testing.T) {
 			var resp types.QueryAllLoanResponse
 			require.NoError(t, net.Config.Codec.UnmarshalJSON(out.Bytes(), &resp))
 			require.LessOrEqual(t, len(resp.Loan), step)
-			require.Subset(t, objs, resp.Loan)
+			require.Subset(t,
+				nullify.Fill(objs),
+				nullify.Fill(resp.Loan),
+			)
 		}
 	})
 	t.Run("ByKey", func(t *testing.T) {
@@ -121,7 +130,10 @@ func TestListLoan(t *testing.T) {
 			var resp types.QueryAllLoanResponse
 			require.NoError(t, net.Config.Codec.UnmarshalJSON(out.Bytes(), &resp))
 			require.LessOrEqual(t, len(resp.Loan), step)
-			require.Subset(t, objs, resp.Loan)
+			require.Subset(t,
+				nullify.Fill(objs),
+				nullify.Fill(resp.Loan),
+			)
 			next = resp.Pagination.NextKey
 		}
 	})
@@ -133,6 +145,9 @@ func TestListLoan(t *testing.T) {
 		require.NoError(t, net.Config.Codec.UnmarshalJSON(out.Bytes(), &resp))
 		require.NoError(t, err)
 		require.Equal(t, len(objs), int(resp.Pagination.Total))
-		require.Equal(t, objs, resp.Loan)
+		require.ElementsMatch(t,
+			nullify.Fill(objs),
+			nullify.Fill(resp.Loan),
+		)
 	})
 }

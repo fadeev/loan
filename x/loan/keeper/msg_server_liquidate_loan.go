@@ -2,8 +2,6 @@ package keeper
 
 import (
 	"context"
-	"fmt"
-	"strconv"
 
 	"github.com/cosmonaut/loan/x/loan/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -15,7 +13,7 @@ func (k msgServer) LiquidateLoan(goCtx context.Context, msg *types.MsgLiquidateL
 
 	loan, found := k.GetLoan(ctx, msg.Id)
 	if !found {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrKeyNotFound, fmt.Sprintf("key %d doesn't exist", msg.Id))
+		return nil, sdkerrors.Wrapf(sdkerrors.ErrKeyNotFound, "key %d doesn't exist", msg.Id)
 	}
 
 	if loan.Lender != msg.Creator {
@@ -26,22 +24,17 @@ func (k msgServer) LiquidateLoan(goCtx context.Context, msg *types.MsgLiquidateL
 		return nil, sdkerrors.Wrapf(types.ErrWrongLoanState, "%v", loan.State)
 	}
 
-	lender, _ := sdk.AccAddressFromBech32(loan.Lender)
-	collateral, _ := sdk.ParseCoinsNormalized(loan.Collateral)
-
-	deadline, err := strconv.ParseInt(loan.Deadline, 10, 64)
-	if err != nil {
-		panic(err)
-	}
-
-	if ctx.BlockHeight() < deadline {
+	if ctx.BlockHeight() < int64(loan.Deadline) {
 		return nil, sdkerrors.Wrap(types.ErrDeadline, "Cannot liquidate before deadline")
 	}
 
-	k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lender, collateral)
+	lender, _ := sdk.AccAddressFromBech32(loan.Lender)
+	err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lender, loan.Collateral)
+	if err != nil {
+		return nil, err
+	}
 
 	loan.State = "liquidated"
-
 	k.SetLoan(ctx, loan)
 
 	return &types.MsgLiquidateLoanResponse{}, nil

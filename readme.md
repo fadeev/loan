@@ -22,9 +22,9 @@ cd loan
 
 starport s module loan --dep bank
 
-starport s list loan amount fee collateral deadline state borrower lender --no-message
+starport s list loan amount:coins fee:coins collateral:coins deadline:uint state borrower lender --no-message
 
-starport s message request-loan amount fee collateral deadline
+starport s message request-loan amount:coins fee:coins collateral:coins deadline:uint
 
 starport s message approve-loan id:uint
 

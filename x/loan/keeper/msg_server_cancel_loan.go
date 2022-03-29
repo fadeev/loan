@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/cosmonaut/loan/x/loan/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -14,7 +13,7 @@ func (k msgServer) CancelLoan(goCtx context.Context, msg *types.MsgCancelLoan) (
 
 	loan, found := k.GetLoan(ctx, msg.Id)
 	if !found {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrKeyNotFound, fmt.Sprintf("key %d doesn't exist", msg.Id))
+		return nil, sdkerrors.Wrapf(sdkerrors.ErrKeyNotFound, "key %d doesn't exist", msg.Id)
 	}
 
 	if loan.Borrower != msg.Creator {
@@ -26,11 +25,12 @@ func (k msgServer) CancelLoan(goCtx context.Context, msg *types.MsgCancelLoan) (
 	}
 
 	borrower, _ := sdk.AccAddressFromBech32(loan.Borrower)
-	collateral, _ := sdk.ParseCoinsNormalized(loan.Collateral)
-	k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, borrower, collateral)
+	err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, borrower, loan.Collateral)
+	if err != nil {
+		return nil, err
+	}
 
 	loan.State = "cancelled"
-
 	k.SetLoan(ctx, loan)
 
 	return &types.MsgCancelLoanResponse{}, nil
